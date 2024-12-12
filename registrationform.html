@@ -13,7 +13,6 @@
             display: flex;
             justify-content: center; /* Center horizontally */
             align-items: center;    /* Center vertically */
-            height: 100vh;          /* Full viewport height */
         }
 
         .container {
@@ -24,6 +23,7 @@
             max-width: 400px;
             width: 100%;
             text-align: left;
+            margin: 30px;
         }
 
         h1 {
@@ -54,6 +54,7 @@
         }
 
         input[type="button"] {
+            width: 100%;
             background: #3498db;
             color: white;
             border: none;
@@ -62,7 +63,7 @@
         }
 
         input[type="button"]:hover {
-            background: #2980b9;
+            background: #61e647;
         }
 
         span {
@@ -148,7 +149,7 @@
                         size.classList.remove("success");
                         size.classList.add("error");
                     } else {
-                        size.innerHTML = 'Filen Size: <b>' + file + '</b> KB';
+                        size.innerHTML = 'Filen Size: <b>' + file + '</b> KB Valid image!';
                         size.classList.remove("error");
                         size.classList.add("success");
                     }
@@ -208,6 +209,7 @@
             }
 
             //password
+            //const p = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/; //For Password Strength Validation
             var p = document.getElementById("pass").value;
             var cnp = document.getElementById("conpass").value;
             var passMessage = document.getElementById("passtxt");
@@ -314,14 +316,15 @@
         <div id="imagePreview">Select an Image</div>
         <span id="size"></span><br>
 
-        <label for="capcha">Enter Capcha:</label>
+        <label for="capcha">Enter CAPTCHA:</label>
         <div id="captchaContainer">
             <div id="captchaDisplay"></div>
+            <input type="button" onclick="generate()" value="Refresh CAPTCHA">
             <input type="text" id="submit" placeholder="Enter CAPTCHA">
             <span id="key"></span>
         </div>
 
-        <input type="button" value="Set Password" onclick="confirm()">
+        <input type="button" value="Submit" onclick="confirm()">
         
     </div>
 </body>
