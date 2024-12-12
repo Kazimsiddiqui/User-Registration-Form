@@ -45,7 +45,7 @@
         input[type="password"],
         input[type="file"],
         input[type="button"] {
-            width: 100%;
+            width: 95%;
             padding: 10px;
             margin: 5px 0 15px;
             border: 1px solid #ccc;
@@ -70,20 +70,38 @@
             color: #e74c3c;
         }
 
-        #passtxt.success {
+        .success{
             color: #27ae60; /* Green color for success */
             font-weight: bold;
         }
-
-        #passtxt.error {
+        .error{
             color: #e74c3c; /* Red color for errors */
         }
 
-        #size {
-            display: block;
-            margin-top: 5px;
-            color: #16a085;
+        #captchaDisplay {
+            font-size: 18px;
             font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            background: #f2f2f2;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration:line-through;
+            font-style: italic;
+        }
+        
+        #imagePreview{
+            margin-top: 10px;
+            width: 50px;;
+            padding: 5px;
+            text-align: center;
+            font-weight: 400;
+            height: 50px;
+            font-size: small;
+            color: #27ae60;
+            border: black 2px solid;
+            margin-left: 10px;
         }
 
         @media (max-width: 480px) {
@@ -97,15 +115,73 @@
         }
     </style>
     <script>
-        function confirm() {
-            var em = document.getElementById("email").value;
-            var em2 = em.match(/@/g);
-            if (em2 != null) {
-                document.getElementById("emtxt").innerHTML = "";
-            } else {
-                document.getElementById("emtxt").innerHTML = "Please enter a valid mail";
-            }
 
+        //capcha geration
+        let captcha;
+        function generate()
+        {
+            document.getElementById("submit").value="";
+            captcha=document.getElementById("captchaDisplay");
+            let uniquechar="";
+            const randomchar="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            for(let i=1;i<5;i++)
+            {
+                uniquechar+=randomchar.charAt(Math.random()*randomchar.length)
+            }
+            captcha.innerHTML=uniquechar;
+        }
+
+        //file size validation
+        function Filevalidation() {
+            const fi = document.getElementById('file');
+            if (fi.files.length > 0) {
+                for (let i = 0; i <= fi.files.length - 1; i++) {
+                    const fsize = fi.files.item(i).size;
+                    const file = Math.round((fsize / 1024));
+
+                    if (file >= 5096) {
+                        size.innerHTML = "File too big, Please enter a valid image.";
+                        size.classList.remove("success");
+                        size.classList.add("error");
+                    } else if (file < 500) {
+                        size.innerHTML = "File too small, Please enter a valid image.";
+                        size.classList.remove("success");
+                        size.classList.add("error");
+                    } else {
+                        size.innerHTML = 'Filen Size: <b>' + file + '</b> KB';
+                        size.classList.remove("error");
+                        size.classList.add("success");
+                    }
+                }
+            }
+            //file type validation
+            var fileInput = document.getElementById('file');
+            var filePath = fileInput.value;
+            // Allowing file type
+            var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+            if (!allowedExtensions.exec(filePath)) {
+                size.innerHTML="Invalid file type";
+                fileInput.value = '';
+                document.getElementById("imagePreview").innerHTML="";
+                return false;
+            } 
+            else 
+            {
+                // Image preview
+                if (fileInput.files && fileInput.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('imagePreview').innerHTML = '<img src="' + e.target.result + '" width=50 height=50/>';
+                    };
+                    reader.readAsDataURL(fileInput.files[0]);
+                }
+            }
+        }//file validation function end.
+
+        //Validation
+        function confirm() {
+
+            //name
             var n = document.getElementById("name").value;
             if (n == "") {
                 document.getElementById("nametxt").innerHTML = "Please enter your name";
@@ -113,11 +189,30 @@
                 document.getElementById("nametxt").innerHTML = "";
             }
 
+            //email
+            var em = document.getElementById("email").value;
+            var simpleEmailRegex = /.+@.+\..+/;
+            if (simpleEmailRegex.test(em)) {
+                document.getElementById("emtxt").innerHTML = ""; // It is an email
+            } else {
+                document.getElementById("emtxt").innerHTML = "Please enter a valid email address"; // Not an email
+            }
+
+            //contact number
+            const contact = document.getElementById("connumber").value.trim();
+            if (contact === "" || contact.length < 10) {
+                document.getElementById("numtxt").innerText = "Please enter a valid contact number.";
+                isValid = false;
+            } else {
+                document.getElementById("numtxt").innerText = "";
+            }
+
+            //password
             var p = document.getElementById("pass").value;
             var cnp = document.getElementById("conpass").value;
             var passMessage = document.getElementById("passtxt");
             if (p == cnp && p != "") {
-                passMessage.innerHTML = "Password created successfully";
+                passMessage.innerHTML = "Password matched successfully";
                 passMessage.classList.remove("error");
                 passMessage.classList.add("success");
             } else {
@@ -126,38 +221,48 @@
                 passMessage.classList.add("error");
             }
 
-            var cont = /\d/;
-            var no = document.getElementById("connumber").value;
-            if (cont.test(no)) {
-                document.getElementById("numtxt").innerHTML = "";
-            } else {
-                document.getElementById("numtxt").innerHTML = "Please enter your contact number";
+            //file
+            var fileem=document.getElementById("file");
+            if(fileem.files.length===0)
+            {
+                size.innerHTML = "Please select an image.";
+                size.classList.remove("success");
+                size.classList.add("error");
             }
 
-            // If no errors, reset the form after 2 seconds
-            if (passMessage.classList.contains("success") && em2 && n != "" && cont.test(no)) {
-                setTimeout(resetForm, 2000); // Delay of 2 seconds
+            //capcha
+            const usr_input=document.getElementById("submit").value;
+            if(usr_input==="")
+            {
+                let s=document.getElementById("key").innerHTML="Enter Capcha";
+                key.classList.remove("success");
+                key.classList.add("error");
+                generate();
+            }
+            else if(usr_input==captcha.innerHTML)
+            {
+                let s=document.getElementById("key").innerHTML="Matched";
+                key.classList.remove("error");
+                key.classList.add("success");
+            }
+            else
+            {
+                let s=document.getElementById("key").innerHTML="Not matched";
+                key.classList.remove("success");
+                key.classList.add("error");
+                generate();
+            }
+
+            // If no errors,submit and reset the form after 1.5 seconds
+            if (passMessage.classList.contains("success") && simpleEmailRegex.test(em) &&
+                size.classList.contains("success") && key.classList.contains("success") && 
+                n != "" && contact != "" && contact.length >= 10) 
+            {
+                setTimeout(resetForm, 1500); // Delay of 1.5 seconds
             }
         }
 
-        function Filevalidation() {
-            const fi = document.getElementById('file');
-            if (fi.files.length > 0) {
-                for (let i = 0; i <= fi.files.length - 1; i++) {
-                    const fsize = fi.files.item(i).size;
-                    const file = Math.round((fsize / 1024));
-
-                    if (file >= 4096) {
-                        alert("File too big");
-                    } else if (file < 2048) {
-                        alert("File too small");
-                    } else {
-                        document.getElementById('size').innerHTML = '<b>' + file + '</b> KB';
-                    }
-                }
-            }
-        }
-
+        //Form Reset
         function resetForm() {
             // Reset all input fields
             document.getElementById("name").value = "";
@@ -166,6 +271,8 @@
             document.getElementById("pass").value = "";
             document.getElementById("conpass").value = "";
             document.getElementById("file").value = "";
+            document.getElementById("imagePreview").value="";
+            document.getElementById("submit").value="";
 
             // Reset all spans
             document.getElementById("nametxt").innerHTML = "";
@@ -173,12 +280,14 @@
             document.getElementById("numtxt").innerHTML = "";
             document.getElementById("passtxt").innerHTML = "";
             document.getElementById("size").innerHTML = "";
-
-            alert("Form successfully submitted and reset!");
+            document.getElementById("imagePreview").innerHTML="";
+            document.getElementById("key").innerHTML="";
+            alert("Form successfully submitted.");
+            generate();
         }
     </script>
 </head>
-<body>
+<body onload="generate();">
     <div class="container">
         <h1>User Registration</h1>
         <label for="name">Name:</label>
@@ -202,9 +311,18 @@
 
         <label for="file">Passport Size Photo:</label>
         <input type="file" id="file" onchange="Filevalidation()">
-        <span id="size"></span>
+        <div id="imagePreview">Select an Image</div>
+        <span id="size"></span><br>
+
+        <label for="capcha">Enter Capcha:</label>
+        <div id="captchaContainer">
+            <div id="captchaDisplay"></div>
+            <input type="text" id="submit" placeholder="Enter CAPTCHA">
+            <span id="key"></span>
+        </div>
 
         <input type="button" value="Set Password" onclick="confirm()">
+        
     </div>
 </body>
 </html>
